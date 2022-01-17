@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ -z "$3" ]; then
+  echo "Usage: $(basename $0) seed psi outdir"
+  exit 1
+fi
+
+set -e
+
+cd $(dirname $0)
+
+# python 3.6 + older Tensorflow required
+. env/bin/activate
+
+# for nvcc
+export PATH=$PATH:/usr/local/cuda-11.0/bin/
+
+# Faces
+export MODEL="models/stylegan2-ffhq-config-f.pkl"
+
+./make_a_face.py --network ${MODEL} --seed=$1 --truncation-psi=$2 --out=$3
