@@ -21,16 +21,16 @@ import pretrained_networks
 
 #----------------------------------------------------------------------------
 
-def generate_images(network_pkl, seed, truncation_psi, out):
-    print('Loading networks from "%s"...' % network_pkl)
-    _G, _D, Gs = pretrained_networks.load_networks(network_pkl)
+def generate_images(model, seed, psi, out):
+    print('Loading networks from "%s"...' % model)
+    _G, _D, Gs = pretrained_networks.load_networks(model)
     noise_vars = [var for name, var in Gs.components.synthesis.vars.items() if name.startswith('noise')]
 
     Gs_kwargs = dnnlib.EasyDict()
     Gs_kwargs.output_transform = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
     Gs_kwargs.randomize_noise = False
-    if truncation_psi is not None:
-        Gs_kwargs.truncation_psi = truncation_psi
+    if psi is not None:
+        Gs_kwargs.psi = psi
 
     print(f'Generating image for seed {seed}')
     rnd = np.random.RandomState(seed)
@@ -44,7 +44,8 @@ def generate_images(network_pkl, seed, truncation_psi, out):
             {
                 "engine": "StyleGAN2",
                 "seed": seed,
-                "psi": truncation_psi
+                "psi": psi,
+                "model": model
             }
         ))
 
@@ -63,14 +64,14 @@ def main():
         description='''StyleGAN2 face generator.'''
     )
 
-    parser.add_argument('--network', help='Network pickle filename', required=True)
+    parser.add_argument('--model', help='Model filename', required=True)
     parser.add_argument('--seed', type=int, help='Random seed', required=True)
-    parser.add_argument('--truncation-psi', type=float, help='Truncation psi (default: %(default)s)', default=0.5)
-    parser.add_argument('--out', help='Output path for jpg and json (default: %(default)s)', default='out2.jpg')
+    parser.add_argument('--psi', type=float, help='Truncation psi (default: %(default)s)', default=0.6)
+    parser.add_argument('--out', help='Output path for jpg and json (default: %(default)s)', default='out.jpg')
 
     args = parser.parse_args()
 
-    generate_images(args.network, args.seed, args.truncation_psi, args.out)
+    generate_images(args.model, args.seed, args.psi, args.out)
 
 if __name__ == "__main__":
     main()
