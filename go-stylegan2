@@ -1,7 +1,7 @@
 #!/bin/bash
-
-if [ -z "$3" ]; then
-  echo "Usage: $(basename $0) seed psi outdir"
+set -x
+if [ -z "$4" ]; then
+  echo "Usage: $(basename $0) model seed psi outfile"
   exit 1
 fi
 
@@ -13,9 +13,6 @@ cd $(dirname $0)
 . env/bin/activate
 
 # for nvcc
-export PATH=$PATH:/usr/local/cuda-11.0/bin/
+export PATH=$PATH:/usr/local/cuda-11.6/bin/
 
-# Faces
-export MODEL="models/stylegan2-ffhq-config-f.pkl"
-
-./make_a_face.py --network ${MODEL} --seed=$1 --truncation-psi=$2 --out=$3
+./make_a_face.py --model=$1 --seed=$2 --psi=$3 --out=$4
